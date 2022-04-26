@@ -43,7 +43,7 @@ if __name__ == "__main__":
     button=tk.Button(root,
                     text="+",
                     font=("Times New Roman", 30))
-    button.bind("<1>", click_equal)
+    button.bind("<1>", button_click)
     button.grid(column=2, row=4, padx=10, pady=10)
 
     button=tk.Button(root,
