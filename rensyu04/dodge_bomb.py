@@ -1,6 +1,4 @@
-from re import X
-from ssl import RAND_status
-from turtle import Turtle
+
 import pygame as pg
 import sys
 import random
@@ -37,9 +35,16 @@ def main():
     bomb_rect.centerx = random.randint(0, sc_rect.width)
     bomb_rect.centery = random.randint(0,sc_rect.height)
     screen.blit(bomb, bomb_rect)
-    vx, vy = +1, +1
+    vx, vy = +2, +2  #爆弾のスピード
+    
 
 
+    #追加　文字設定
+    width = 1600
+    height = 800
+    fonto = pg.font.Font(None, 150)
+    
+    
 
 
 
@@ -66,9 +71,20 @@ def main():
         ret = check_bound(sc_rect, bomb_rect)
         vx *= ret[0] #横方向に画面外なら、横方向速度の符号反転
         vy *= ret[1] #縦方向に画面外なた、縦方向速度の符号反転
+        
 
         #練習8
-        if tori_rect.colliderect(bomb_rect): return #こうかとんrectが爆弾rectと衝突したらreturn
+        
+        if tori_rect.colliderect(bomb_rect):
+            txt = fonto.render("GAME OVER"+"  "+"time:"+str(pg.time.get_ticks()//1000)+"s", True, (255,0,0))
+            txt_rect= txt.get_rect(center=(width//2,height//2))
+
+
+            screen.blit(txt, (txt_rect))   
+            pg.display.update()
+            clock = pg.time.Clock()
+            clock.tick(0.5)
+            return #こうかとんrectが爆弾rectと衝突したらreturn
 
 
         pg.display.update() #画面の更新
@@ -88,4 +104,4 @@ if __name__ == "__main__":
     pg.init()  
     main()
     pg.quit()
-    sys.exit()
+    sys.eit()
