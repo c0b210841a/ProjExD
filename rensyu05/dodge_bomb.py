@@ -69,13 +69,20 @@ def main():
     screen.disp.blit(screen.image, (0,0))                   # 背景画像用Surfaceを画面用Surfaceに貼り付ける
 
     # 練習3
-    tori = Bird("fig/3.png", 2, (900, 400))
-    screen.disp.blit(tori.image, tori.rect)
+    #tori = Bird("fig/3.png", 2, (900, 400))
+    #screen.disp.blit(tori.image, tori.rect)
     # こうかとん画像用のSurfaceを画面用Surfaceに貼り付ける
+    tori = pg.sprite.Group()
+    tori.add(Bird("fig/3.png", 2, (900, 400)))
 
     # 練習5
-    bomb = Bomb((255,0,0), 10, (+2, +2), screen)
-    screen.disp.blit(bomb.image, bomb.rect)            # 爆弾用のSurfaceを画面用Surfaceに貼り付ける
+    #bomb = Bomb((255,0,0), 10, (+2, +2), screen)
+    #screen.disp.blit(bomb.image, bomb.rect)      
+    # 爆弾用のSurfaceを画面用Surfaceに貼り付ける
+    bombs = pg.sprite.Group()
+    for _ in range(5):
+        bombs.add(Bomb((255,0,0), 10, (+2, +2), screen))
+
     
     while True:
         # 練習2
@@ -83,16 +90,19 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: return       # ✕ボタンでmain関数から戻る
 
-        # 練習4
+        # 練習4        
         tori.update(screen)
-        screen.disp.blit(tori.image, tori.rect)
+        #screen.disp.blit(tori.image, tori.rect)
+        tori.draw(screen.disp)
 
         # 練習6
-        bomb.update(screen)
-        screen.disp.blit(bomb.image, bomb.rect)        
+        bombs.update(screen)
+        #screen.disp.blit(bomb.image, bomb.rect)  
+        bombs.draw(screen.disp)      
 
         # 練習8
-        if tori.rect.colliderect(bomb.rect): return
+        if len(pg.sprite.groupcollide(tori, bombs, False, False)) != 0: return
+        #if pg.sprite.collide_rect(tori, bomb): return
         # こうかとん用のRectが爆弾用のRectと衝突していたらreturn
         pg.display.update()  # 画面の更新
         clock.tick(1000) 
