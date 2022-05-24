@@ -2,7 +2,7 @@ import pygame as pg
 import sys
 import random
 
-
+f = 0
 class Screen:
     def __init__(self, fn, wh, title): 
         #fn:背景画像のパス, wh:幅高さのタプル
@@ -32,12 +32,20 @@ class Bird(pg.sprite.Sprite):
         key_states = pg.key.get_pressed()
         for key, delta in Bird.key_delta.items():
             if key_states[key] == True:
-                self.rect.centerx += delta[0]
-                self.rect.centery += delta[1]
+                if f == 1:
+                    self.rect.centerx += delta[0] * 2
+                    self.rect.centery += delta[1] * 2
+                else:
+                    self.rect.centerx += delta[0]
+                    self.rect.centery += delta[1]
                 # 練習7
                 if check_bound(screen.rect, self.rect) != (1,1): 
-                    self.rect.centerx -= delta[0]
-                    self.rect.centery -= delta[1]
+                    if f == 1:
+                        self.rect.centerx -= delta[0] * 2
+                        self.rect.centery -= delta[1] * 2
+                    else:
+                        self.rect.centerx -= delta[0]
+                        self.rect.centery -= delta[1]
 
 
 class Bomb(pg.sprite.Sprite):
@@ -60,9 +68,32 @@ class Bomb(pg.sprite.Sprite):
         self.vx *= x # 横方向に画面外なら，横方向速度の符号反転
         self.vy *= y # 縦方向に画面外なら，縦方向速度の符号反転
 
+# 追加
+class Star(pg.sprite.Sprite):
+    def __init__(self, color, r, vxy, screen):
+        # color:星円の色 r:星円の半径, 
+        # vxy:星円の速度のタプル
+        # screen: 描画用Screenオブジェクト
+        super().__init__()
+        self.image = pg.Surface((2*r,2*r))            # 星円用のSurface
+        self.image.set_colorkey((0,0,0))              # 黒色部分を透過する
+        pg.draw.circle(self.image, color, (r,r), r)   # 星円用Surfaceに円を描く
+        self.rect = self.image.get_rect()             # 星円用Rect
+        self.rect.centerx = random.randint(0, screen.rect.width)
+        self.rect.centery = random.randint(0, screen.rect.height)
+        self.vx, self.vy = vxy
+
+    def update(self, screen):
+        self.rect.move_ip(self.vx, self.vy)
+        x, y = check_bound(screen.rect, self.rect)
+        self.vx *= x # 横方向に画面外なら，横方向速度の符号反転
+        self.vy *= y # 縦方向に画面外なら，縦方向速度の符号反転
+
+
 
 def main():
     clock = pg.time.Clock()
+
     
     # 練習1
     screen = Screen("fig/pg_bg.jpg", (1600, 900),"逃げろ！こうかとん")
@@ -80,8 +111,11 @@ def main():
     #screen.disp.blit(bomb.image, bomb.rect)      
     # 爆弾用のSurfaceを画面用Surfaceに貼り付ける
     bombs = pg.sprite.Group()
-    for _ in range(5):
-        bombs.add(Bomb((255,0,0), 10, (+2, +2), screen))
+    for i in range(1,5):
+        bombs.add(Bomb((255,0,0), 10*i, (+2, +2), screen))
+
+    star = pg.sprite.Group()
+    star.add(Star((255,255,0), 20, (+2, +2), screen))
 
     
     while True:
@@ -98,10 +132,29 @@ def main():
         # 練習6
         bombs.update(screen)
         #screen.disp.blit(bomb.image, bomb.rect)  
-        bombs.draw(screen.disp)      
+        bombs.draw(screen.disp) 
+
+        star.update(screen)
+        star.draw(screen.disp)
+
+
+        #追加
+        if len(pg.sprite.groupcollide(tori, star, False, False)) != 0:
+            f = 1          
+
 
         # 練習8
-        if len(pg.sprite.groupcollide(tori, bombs, False, False)) != 0: return
+        if len(pg.sprite.groupcollide(tori, bombs, False, False)) != 0:
+            #追加　文字設定
+            fonto = pg.font.Font(None, 150)
+            txt = fonto.render("GAME OVER"+"  "+"time:"+str(pg.time.get_ticks()//1000)+"s", True, (255,0,0))
+            txt_xy= txt.get_rect(center=(screen.width//2,screen.height//2))
+            screen.disp.blit(txt,txt_xy)
+            pg.display.update()
+            clock = pg.time.Clock()
+            clock.tick(0.5)
+            return
+
         #if pg.sprite.collide_rect(tori, bomb): return
         # こうかとん用のRectが爆弾用のRectと衝突していたらreturn
         pg.display.update()  # 画面の更新
