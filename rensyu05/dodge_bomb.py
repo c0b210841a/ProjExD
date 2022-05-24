@@ -13,7 +13,7 @@ class Screen:
         self.image = pg.image.load(fn) #Surface
         
 
-class Bird:
+class Bird(pg.sprite.Sprite):
     key_delta = {pg.K_UP   : [0, -1],
                 pg.K_DOWN : [0, +1],
                 pg.K_LEFT : [-1, 0],
@@ -22,6 +22,7 @@ class Bird:
 
     def __init__(self, fn, r, xy):
         #fn:画像のパス, r:拡大率, xy:初期配置座標のタプル
+        super().__init__()
         self.image = pg.image.load(fn)    #Surface
         self.image = pg.transform.rotozoom(self.image, 0, r)
         self.rect= self.image.get_rect() #Rect
@@ -39,11 +40,12 @@ class Bird:
                     self.rect.centery -= delta[1]
 
 
-class Bomb:
+class Bomb(pg.sprite.Sprite):
     def __init__(self, color, r, vxy, screen):
         # color:爆弾の色 r:爆弾円の半径, 
         # vxy:爆弾円の速度のタプル
         # screen: 描画用Screenオブジェクト
+        super().__init__()
         self.image = pg.Surface((2*r,2*r))            # 爆弾用のSurface
         self.image.set_colorkey((0,0,0))              # 黒色部分を透過する
         pg.draw.circle(self.image, color, (r,r), r)   # 爆弾用Surfaceに円を描く
